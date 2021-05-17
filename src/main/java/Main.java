@@ -61,7 +61,7 @@ public class Main {
         sortAndReset.setLayout(new FlowLayout());
         sortAndReset.setBounds(530, 0, 100, 100);
 
-        buttonSort = getSortButton(jFrame, jPanel);
+        buttonSort = getSortButton(jPanel);
         buttonReset = getResetButton(jFrame);
         sortAndReset.add(buttonSort);
         sortAndReset.add(buttonReset);
@@ -136,7 +136,7 @@ public class Main {
         }
     }
 
-    public static JButton getSortButton(JFrame jFrame, JPanel jPanel) {
+    public static JButton getSortButton(JPanel jPanel) {
         JButton jButton = new JButton();
         jButton.setBackground(Color.BLACK);
         jButton.setText("Sort");
@@ -144,13 +144,12 @@ public class Main {
         jButton.setForeground(Color.WHITE);
         jButton.setBorder(BorderFactory.createEtchedBorder());
         jButton.addActionListener(e -> {
-            sorting();
-            isDescSort = !isDescSort;
-            jFrame.revalidate();
-            for (JButton j : arrayOfButton) {
-                jPanel.add(j);
+            try {
+                sorting();
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
             }
-            jFrame.revalidate();
+            isDescSort = !isDescSort;
         });
         return jButton;
     }
@@ -169,13 +168,13 @@ public class Main {
         return jButton;
     }
 
-    public static void sorting() {
+    public static void sorting() throws InterruptedException {
         int high = arrayOfButton.length - 1;
         SortClass.quickSort(arrayOfButton, 0, high);
     }
 
     static class SortClass {
-        static int partition(JButton[] array, int low, int high) {
+        static int partition(JButton[] array, int low, int high) throws InterruptedException {
             int pivot = Integer.parseInt(array[high].getText());
             int i = (low - 1);
 
@@ -203,16 +202,29 @@ public class Main {
             JButton temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
+            repaint(array);
+            Thread.sleep(2000);
             return (i + 1);
         }
 
-        public static void quickSort(JButton[] array, int low, int high) {
+        public static void quickSort(JButton[] array, int low, int high) throws InterruptedException {
             if (low < high) {
                 int pi = partition(array, low, high);
                 quickSort(array, low, pi - 1);
                 quickSort(array, pi + 1, high);
             }
         }
+    }
+
+    public static void repaint(JButton[] array) {
+        jPanel.removeAll();
+        for (JButton jButton : array) {
+            jPanel.add(jButton);
+        }
+        jFrame.repaint();
+        jFrame.revalidate();
+        jPanel.repaint();
+        jPanel.revalidate();
     }
 
     static class MyLayout implements LayoutManager {
