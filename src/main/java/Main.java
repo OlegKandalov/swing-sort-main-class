@@ -5,7 +5,7 @@ import java.util.Random;
 public class Main {
     static int inputFromFirstPage;
     final static Random random = new Random();
-    static int[] arrayOfButton;
+    static JButton[] arrayOfButton;
     static JPanel jPanel;
     static JPanel sortAndReset;
     static JButton buttonSort;
@@ -39,39 +39,20 @@ public class Main {
         jPanel = new JPanel();
         jPanel.setLayout(new MyLayout());
         sortAndReset = getPanelSecondPage(jFrame);
+
+        jFrame.add(sortAndReset);
+        jFrame.add(jPanel);
+        jFrame.setVisible(true);
+
+        arrayOfButton = new JButton[inputFromFirstPage];
         JButton buttonLessThan30 = getButtonLessThan30(jFrame);
+        arrayOfButton[0] = buttonLessThan30;
         jPanel.add(buttonLessThan30);
 
-        jFrame.add(sortAndReset);
-        jFrame.add(jPanel);
-        jFrame.setVisible(true);
-
-        arrayOfButton = new int[inputFromFirstPage];
-
-        for (int i = 0; i < inputFromFirstPage - 1; i++) {
+        for (int i = 1; i < inputFromFirstPage; i++) {
             JButton buttonRandom = getRandomButton(jFrame);
-            int number = Integer.parseInt(buttonRandom.getText());
-            arrayOfButton[i] = number;
+            arrayOfButton[i] = buttonRandom;
             jPanel.add(buttonRandom);
-        }
-    }
-
-    public static void getSortingPage() {
-        jFrame = getFrame("Sort screen");
-        jPanel = new JPanel();
-        jPanel.setLayout(new MyLayout());
-        sortAndReset = getPanelSecondPage(jFrame);
-
-        jFrame.add(sortAndReset);
-        jFrame.add(jPanel);
-        jFrame.setVisible(true);
-
-        if (!isDescSort) {
-            sorting(jFrame);
-            isDescSort = true;
-        } else {
-            sorting(jFrame);
-            isDescSort = false;
         }
     }
 
@@ -80,7 +61,7 @@ public class Main {
         sortAndReset.setLayout(new FlowLayout());
         sortAndReset.setBounds(530, 0, 100, 100);
 
-        buttonSort = getSortButton(jFrame);
+        buttonSort = getSortButton(jFrame, jPanel);
         buttonReset = getResetButton(jFrame);
         sortAndReset.add(buttonSort);
         sortAndReset.add(buttonReset);
@@ -155,7 +136,7 @@ public class Main {
         }
     }
 
-    public static JButton getSortButton(JFrame jFrame) {
+    public static JButton getSortButton(JFrame jFrame, JPanel jPanel) {
         JButton jButton = new JButton();
         jButton.setBackground(Color.BLACK);
         jButton.setText("Sort");
@@ -163,8 +144,13 @@ public class Main {
         jButton.setForeground(Color.WHITE);
         jButton.setBorder(BorderFactory.createEtchedBorder());
         jButton.addActionListener(e -> {
-            jFrame.dispose();
-            getSortingPage();
+            sorting();
+            isDescSort = !isDescSort;
+            jFrame.revalidate();
+            for (JButton j : arrayOfButton) {
+                jPanel.add(j);
+            }
+            jFrame.revalidate();
         });
         return jButton;
     }
@@ -183,50 +169,44 @@ public class Main {
         return jButton;
     }
 
-    public static void sorting(JFrame jFrame) {
+    public static void sorting() {
         int high = arrayOfButton.length - 1;
         SortClass.quickSort(arrayOfButton, 0, high);
-        for (int j : arrayOfButton) {
-            JButton temp = getButton();
-            temp.setText("" + j);
-            isSmallerThan30(temp, jFrame);
-            jPanel.add(temp);
-        }
     }
 
     static class SortClass {
-        static int partition(int[] array, int low, int high) {
-            int pivot = array[high];
+        static int partition(JButton[] array, int low, int high) {
+            int pivot = Integer.parseInt(array[high].getText());
             int i = (low - 1);
 
             if (isDescSort) {
                 for (int j = low; j < high; j++) {
-                    if (array[j] <= pivot) {
+                    if (Integer.parseInt(array[j].getText()) <= pivot) {
                         i++;
 
-                        int temp = array[i];
+                        JButton temp = array[i];
                         array[i] = array[j];
                         array[j] = temp;
                     }
                 }
             } else {
                 for (int j = low; j < high; j++) {
-                    if (array[j] >= pivot) {
+                    if (Integer.parseInt(array[j].getText()) >= pivot) {
                         i++;
 
-                        int temp = array[i];
+                        JButton temp = array[i];
                         array[i] = array[j];
                         array[j] = temp;
                     }
                 }
             }
-            int temp = array[i + 1];
+            JButton temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
             return (i + 1);
         }
 
-        public static void quickSort(int[] array, int low, int high) {
+        public static void quickSort(JButton[] array, int low, int high) {
             if (low < high) {
                 int pi = partition(array, low, high);
                 quickSort(array, low, pi - 1);
