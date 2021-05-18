@@ -12,6 +12,8 @@ public class Main {
     static JButton buttonReset;
     static boolean isDescSort;
     static JFrame jFrame;
+    static JTextField textInput;
+    static long speed = 500;
 
     public static void main(String[] args) {
         getFirstPage();
@@ -24,7 +26,7 @@ public class Main {
         JTextField textField = new JTextField();
         textField.setPreferredSize(new Dimension(60, 20));
         buttonFirstPage.addActionListener(e -> {
-            if (validating(textField))
+            if (validationInputFirstPage(textField))
                 jFrame.dispose();
             getSecondPage();
         });
@@ -56,23 +58,6 @@ public class Main {
         }
     }
 
-    public static JPanel getPanelSecondPage(JFrame jFrame) {
-        sortAndReset = new JPanel();
-        sortAndReset.setLayout(new FlowLayout());
-        sortAndReset.setBounds(530, 0, 100, 100);
-
-        buttonSort = getSortButton(jPanel);
-        buttonReset = getResetButton(jFrame);
-        sortAndReset.add(buttonSort);
-        sortAndReset.add(buttonReset);
-        return sortAndReset;
-    }
-
-    private static boolean validating(JTextField textField) {
-        inputFromFirstPage = Integer.parseInt(textField.getText());
-        return inputFromFirstPage >= 0 & inputFromFirstPage <= 1000;
-    }
-
     public static JButton getButtonFirstPage() {
         JButton button = new JButton();
         button.setBounds(200, 100, 100, 75);
@@ -82,14 +67,6 @@ public class Main {
         button.setForeground(Color.WHITE);
         button.setBorder(BorderFactory.createEtchedBorder());
         return button;
-    }
-
-    public static JFrame getFrame(String title) {
-        jFrame = new JFrame();
-        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jFrame.setTitle(title);
-        jFrame.setSize(700, 700);
-        return jFrame;
     }
 
     public static JButton getButtonLessThan30(JFrame jFrame) {
@@ -123,6 +100,71 @@ public class Main {
         return jButton;
     }
 
+    public static JButton getSortButton(JPanel jPanel) {
+        JButton jButton = new JButton();
+        jButton.setBackground(Color.BLACK);
+        jButton.setText(" Sort  ");
+        jButton.setFocusable(false);
+        jButton.setForeground(Color.WHITE);
+        jButton.addActionListener(e -> {
+            try {
+                sorting();
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+            for (JButton j : arrayOfButton) {
+                jPanel.add(j);
+            }
+            jFrame.repaint();
+            jFrame.revalidate();
+            isDescSort = !isDescSort;
+            speed = 500;
+        });
+        return jButton;
+    }
+
+    public static JButton getResetButton(JFrame jFrame) {
+        JButton jButton = new JButton();
+        jButton.setBackground(Color.GREEN);
+        jButton.setText("Reset");
+        jButton.setFocusable(false);
+        jButton.setForeground(Color.WHITE);
+        jButton.addActionListener(e -> {
+            jFrame.dispose();
+            getFirstPage();
+        });
+        return jButton;
+    }
+
+    public static JPanel getPanelSecondPage(JFrame jFrame) {
+        sortAndReset = new JPanel();
+        sortAndReset.setLayout(new FlowLayout());
+        sortAndReset.setBounds(530, 0, 100, 200);
+
+        buttonSort = getSortButton(jPanel);
+        buttonReset = getResetButton(jFrame);
+        textInput = new JTextField();
+        textInput.setPreferredSize(new Dimension(70, 25));
+        JTextArea jTextArea = new JTextArea("Enter speed show sort (default 0.5 s):"
+                , 2, 5);
+        jTextArea.setFont(new Font("Serif", Font.BOLD, 12));
+        jTextArea.setLineWrap(true);
+        jTextArea.setWrapStyleWord(true);
+        jTextArea.setOpaque(false);
+        jTextArea.setEditable(false);
+
+        sortAndReset.add(buttonSort);
+        sortAndReset.add(buttonReset);
+        sortAndReset.add(jTextArea);
+        sortAndReset.add(textInput);
+        return sortAndReset;
+    }
+
+    private static boolean validationInputFirstPage(JTextField textField) {
+        inputFromFirstPage = Integer.parseInt(textField.getText());
+        return inputFromFirstPage >= 0 & inputFromFirstPage <= 1000;
+    }
+
     private static void isSmallerThan30(JButton jButton, JFrame jFrame) {
         if (Integer.parseInt(jButton.getText()) > 30) {
             jButton.addActionListener(e -> JOptionPane.showMessageDialog
@@ -136,36 +178,12 @@ public class Main {
         }
     }
 
-    public static JButton getSortButton(JPanel jPanel) {
-        JButton jButton = new JButton();
-        jButton.setBackground(Color.BLACK);
-        jButton.setText("Sort");
-        jButton.setFocusable(false);
-        jButton.setForeground(Color.WHITE);
-        jButton.setBorder(BorderFactory.createEtchedBorder());
-        jButton.addActionListener(e -> {
-            try {
-                sorting();
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
-            }
-            isDescSort = !isDescSort;
-        });
-        return jButton;
-    }
-
-    public static JButton getResetButton(JFrame jFrame) {
-        JButton jButton = new JButton();
-        jButton.setBackground(Color.GREEN);
-        jButton.setText("Reset");
-        jButton.setFocusable(false);
-        jButton.setForeground(Color.WHITE);
-        jButton.setBorder(BorderFactory.createEtchedBorder());
-        jButton.addActionListener(e -> {
-            jFrame.dispose();
-            getFirstPage();
-        });
-        return jButton;
+    public static JFrame getFrame(String title) {
+        jFrame = new JFrame();
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.setTitle(title);
+        jFrame.setSize(700, 700);
+        return jFrame;
     }
 
     public static void sorting() throws InterruptedException {
@@ -175,6 +193,10 @@ public class Main {
 
     static class SortClass {
         static int partition(JButton[] array, int low, int high) throws InterruptedException {
+            if (!textInput.getText().isBlank()) {
+                speed = (long) Double.parseDouble(textInput.getText()) * 1000;
+            }
+
             int pivot = Integer.parseInt(array[high].getText());
             int i = (low - 1);
 
@@ -199,11 +221,21 @@ public class Main {
                     }
                 }
             }
+            array[i + 1].setBackground(Color.PINK);
+            array[high].setForeground(Color.RED);
+            jPanel.repaint();
+            jPanel.revalidate();
             JButton temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
+
             repaint(array);
-            Thread.sleep(2000);
+            Thread.sleep(speed);
+
+            array[high].setBackground(Color.BLUE);
+            array[i + 1].setForeground(Color.WHITE);
+            jPanel.repaint();
+            jPanel.revalidate();
             return (i + 1);
         }
 
@@ -223,8 +255,7 @@ public class Main {
         }
         jFrame.repaint();
         jFrame.revalidate();
-        jPanel.repaint();
-        jPanel.revalidate();
+        RepaintManager.currentManager(jFrame).paintDirtyRegions();
     }
 
     static class MyLayout implements LayoutManager {
