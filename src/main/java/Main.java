@@ -3,17 +3,18 @@ import java.awt.*;
 import java.util.Random;
 
 public class Main {
-    static int inputFromFirstPage;
     final static Random random = new Random();
+    static int createXButtons;
+    static boolean flag;
+    static long speed = 500;
+    static boolean isDescSort;
     static JButton[] arrayOfButton;
     static JPanel jPanel;
     static JPanel sortAndReset;
     static JButton buttonSort;
     static JButton buttonReset;
-    static boolean isDescSort;
     static JFrame jFrame;
     static JTextField textInput;
-    static long speed = 500;
 
     public static void main(String[] args) {
         getFirstPage();
@@ -46,12 +47,8 @@ public class Main {
         jFrame.add(jPanel);
         jFrame.setVisible(true);
 
-        arrayOfButton = new JButton[inputFromFirstPage];
-        JButton buttonLessThan30 = getButtonLessThan30(jFrame);
-        arrayOfButton[0] = buttonLessThan30;
-        jPanel.add(buttonLessThan30);
-
-        for (int i = 1; i < inputFromFirstPage; i++) {
+        arrayOfButton = new JButton[createXButtons];
+        for (int i = 0; i < createXButtons; i++) {
             JButton buttonRandom = getRandomButton(jFrame);
             arrayOfButton[i] = buttonRandom;
             jPanel.add(buttonRandom);
@@ -69,38 +66,20 @@ public class Main {
         return button;
     }
 
-    public static JButton getButtonLessThan30(JFrame jFrame) {
-        JButton reSort = new JButton();
-        reSort.addActionListener(e -> {
-            jFrame.dispose();
-            getSecondPage();
-        });
-        reSort.setBackground(Color.blue);
-        reSort.setText("" + 0);
-        reSort.setFocusable(false);
-        reSort.setForeground(Color.WHITE);
-        reSort.setBorder(BorderFactory.createEtchedBorder());
-        return reSort;
-    }
-
     public static JButton getRandomButton(JFrame jFrame) {
-        JButton jButton = getButton();
-        int randomNumber = random.nextInt(100);
-        jButton.setText("" + randomNumber);
-        isSmallerThan30(jButton, jFrame);
-        return jButton;
-    }
-
-    public static JButton getButton() {
         JButton jButton = new JButton();
         jButton.setFocusable(false);
         jButton.setForeground(Color.WHITE);
         jButton.setBackground(Color.blue);
         jButton.setBorder(BorderFactory.createEtchedBorder());
+        int randomNumber = !flag ? random.nextInt(30) + 1 : random.nextInt(100) + 1;
+        jButton.setText("" + randomNumber);
+        isSmallerThan30(jButton);
+        flag = true;
         return jButton;
     }
 
-    public static JButton getSortButton(JPanel jPanel) {
+    public static JButton getSortButton() {
         JButton jButton = new JButton();
         jButton.setBackground(Color.BLACK);
         jButton.setText(" Sort  ");
@@ -112,11 +91,7 @@ public class Main {
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
-            for (JButton j : arrayOfButton) {
-                jPanel.add(j);
-            }
-            jFrame.repaint();
-            jFrame.revalidate();
+            repaint(arrayOfButton);
             isDescSort = !isDescSort;
             speed = 500;
         });
@@ -131,6 +106,7 @@ public class Main {
         jButton.setForeground(Color.WHITE);
         jButton.addActionListener(e -> {
             jFrame.dispose();
+            flag = false;
             getFirstPage();
         });
         return jButton;
@@ -141,7 +117,7 @@ public class Main {
         sortAndReset.setLayout(new FlowLayout());
         sortAndReset.setBounds(530, 0, 100, 200);
 
-        buttonSort = getSortButton(jPanel);
+        buttonSort = getSortButton();
         buttonReset = getResetButton(jFrame);
         textInput = new JTextField();
         textInput.setPreferredSize(new Dimension(70, 25));
@@ -161,11 +137,11 @@ public class Main {
     }
 
     private static boolean validationInputFirstPage(JTextField textField) {
-        inputFromFirstPage = Integer.parseInt(textField.getText());
-        return inputFromFirstPage >= 0 & inputFromFirstPage <= 1000;
+        createXButtons = Integer.parseInt(textField.getText());
+        return createXButtons >= 0 & createXButtons <= 1000;
     }
 
-    private static void isSmallerThan30(JButton jButton, JFrame jFrame) {
+    private static void isSmallerThan30(JButton jButton) {
         if (Integer.parseInt(jButton.getText()) > 30) {
             jButton.addActionListener(e -> JOptionPane.showMessageDialog
                     (jPanel, "Please select a value smaller or equals to 30"));
@@ -173,6 +149,8 @@ public class Main {
             jButton.addActionListener(e -> {
                 jFrame.dispose();
                 isDescSort = false;
+                flag = false;
+                createXButtons = Integer.parseInt(jButton.getText());
                 getSecondPage();
             });
         }
