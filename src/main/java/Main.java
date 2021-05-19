@@ -49,7 +49,7 @@ public class Main {
 
         arrayOfButton = new JButton[createXButtons];
         for (int i = 0; i < createXButtons; i++) {
-            JButton buttonRandom = getRandomButton(jFrame);
+            JButton buttonRandom = getRandomButton();
             arrayOfButton[i] = buttonRandom;
             jPanel.add(buttonRandom);
         }
@@ -66,7 +66,7 @@ public class Main {
         return button;
     }
 
-    public static JButton getRandomButton(JFrame jFrame) {
+    public static JButton getRandomButton() {
         JButton jButton = new JButton();
         jButton.setFocusable(false);
         jButton.setForeground(Color.WHITE);
